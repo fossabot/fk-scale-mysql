@@ -1,0 +1,29 @@
+{
+    "name": "danielgp/fk-scale-mysql",
+    "description": "Scaling up the column type for fields used in foreign keys in MySQL can be a daunting activity, now this will be no more!",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Daniel Popiniuc",
+            "email": "danielpopiniuc@gmail.com",
+            "role":     "Developer"
+        }
+    ],
+    "require": {
+        "danielgp/common-lib": "*",
+        "ext-mysqli": "*",
+        "php": ">=5.5"
+    },
+    "autoload": {
+        "classmap": [
+            "source/configurationMySQL.php",
+            "source/configurationForAction.php",
+            "source/FKchange.php"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "archive": {
+        "exclude": ["/nbproject", "/vendor", "/tests"]
+    }
+}
