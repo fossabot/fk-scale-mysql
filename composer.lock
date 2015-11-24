@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "315ece5c462fda59cadb2f18108ce431",
-    "content-hash": "eb21058016d4e187c888ca53e5bb3eac",
+    "hash": "293fefb9e5eb4734bcfb3590c5751ffb",
+    "content-hash": "c4dc734043e96b3a92d7532017a1d3b2",
     "packages": [
         {
             "name": "components/flag-icon-css",
@@ -94,16 +94,16 @@
         },
         {
             "name": "danielgp/common-lib",
-            "version": "2.4.6",
+            "version": "2.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/danielgp/common-lib.git",
-                "reference": "5f74b515a31553346803198b12a0dd238335e78b"
+                "reference": "f0a18d60d5fa8c443a992c340db46cec2576bc53"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/danielgp/common-lib/zipball/5f74b515a31553346803198b12a0dd238335e78b",
-                "reference": "5f74b515a31553346803198b12a0dd238335e78b",
+                "url": "https://api.github.com/repos/danielgp/common-lib/zipball/f0a18d60d5fa8c443a992c340db46cec2576bc53",
+                "reference": "f0a18d60d5fa8c443a992c340db46cec2576bc53",
                 "shasum": ""
             },
             "require": {
@@ -144,7 +144,7 @@
                 }
             ],
             "description": "Common functions to be used where needed",
-            "time": "2015-11-23 13:24:05"
+            "time": "2015-11-24 15:29:40"
         },
         {
             "name": "danielgp/common-styles",
@@ -654,8 +654,8 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "ext-mysqli": "*",
-        "php": ">=5.5"
+        "php": ">=5.5",
+        "ext-mysqli": "*"
     },
     "platform-dev": []
 }
