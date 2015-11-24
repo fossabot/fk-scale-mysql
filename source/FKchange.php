@@ -36,8 +36,8 @@ namespace danielgp\fk_scale_mysql;
 class FKchange
 {
 
-    use configurationMySQL,
-        configurationForAction,
+    use ConfigurationMySQL,
+        ConfigurationForAction,
         \danielgp\common_lib\CommonCode,
         \danielgp\common_lib\MySQLiAdvancedOutput;
 
@@ -66,12 +66,12 @@ class FKchange
         echo '<div class="tabbertab" id="FKscaleMySQLresults" title="Results">';
         if (is_array($targetTableTextFields)) {
             echo $this->createDropForignKeysAndGetTargetColumnDefinition($targetTableTextFields);
-            $mainColArray = $this->packParameteresForMainChangeColumn($elToModify, $targetTableTextFields, $col);
+            $mainColArray = $this->packParameteresForMainChangeColumn($elToModify, $targetTableTextFields);
             echo $this->createChangeColumn($mainColArray, [
                 'style'                => 'color:blue;font-weight:bold;',
                 'includeOldColumnType' => true,
             ]);
-            echo $this->recreateFKs($elToModify, $targetTableTextFields, $this->applicationSpecificArray['Cols']);
+            echo $this->recreateFKs($elToModify, $targetTableTextFields);
         } else {
             if (strlen($mConnection) === 0) {
                 echo '<p style="color:red;">Check if provided parameters are correct '
@@ -177,10 +177,10 @@ class FKchange
             'OldDataType' => strtoupper($col[0]['COLUMN_TYPE']) . ' '
             . $this->setColumnDefinitionAdditional($col[0]['IS_NULLABLE'], $col[0]['COLUMN_DEFAULT']),
             'NewDataType' => $elToModify['NewDataType'],
-            'IsNullable'  => $col[0]['IS_NULLABLE'],
-            'Default'     => $col[0]['COLUMN_DEFAULT'],
-            'Extra'       => $col[0]['EXTRA'],
-            'Comment'     => $col[0]['COLUMN_COMMENT'],
+            'IsNullable'  => $this->applicationSpecificArray['Cols'][0]['IS_NULLABLE'],
+            'Default'     => $this->applicationSpecificArray['Cols'][0]['COLUMN_DEFAULT'],
+            'Extra'       => $this->applicationSpecificArray['Cols'][0]['EXTRA'],
+            'Comment'     => $this->applicationSpecificArray['Cols'][0]['COLUMN_COMMENT'],
         ];
     }
 
@@ -193,10 +193,10 @@ class FKchange
                 'Table'       => $value['TABLE_NAME'],
                 'Column'      => $value['COLUMN_NAME'],
                 'NewDataType' => $elToModify['NewDataType'],
-                'IsNullable'  => $colDetails[$key][0]['IS_NULLABLE'],
-                'Default'     => $colDetails[$key][0]['COLUMN_DEFAULT'],
-                'Extra'       => $colDetails[$key][0]['EXTRA'],
-                'Comment'     => $colDetails[$key][0]['COLUMN_COMMENT'],
+                'IsNullable'  => $this->applicationSpecificArray['Cols'][$key][0]['IS_NULLABLE'],
+                'Default'     => $this->applicationSpecificArray['Cols'][$key][0]['COLUMN_DEFAULT'],
+                'Extra'       => $this->applicationSpecificArray['Cols'][$key][0]['EXTRA'],
+                'Comment'     => $this->applicationSpecificArray['Cols'][$key][0]['COLUMN_COMMENT'],
             ]);
             $sReturn[] = $this->createForeignKey([
                 'Database'           => $value['TABLE_SCHEMA'],
