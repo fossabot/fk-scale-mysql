@@ -31,19 +31,27 @@ namespace danielgp\fk_scale_mysql;
 trait ConfigurationForAction
 {
 
+    /**
+     * Manages the configuration for parameters to scale FK
+     *
+     * Default values are targeting "world" database
+     * which can be downloaded from http://dev.mysql.com/doc/index-other.html
+     *
+     * @return array
+     */
     protected function targetElementsToModify()
     {
         if (!isset($_REQUEST['db'])) {
-            $_REQUEST['db'] = 'usefull_security';
+            $_REQUEST['db'] = 'world';
         }
         if (!isset($_REQUEST['tbl'])) {
-            $_REQUEST['tbl'] = 'user_application';
+            $_REQUEST['tbl'] = 'country';
         }
         if (!isset($_REQUEST['fld'])) {
-            $_REQUEST['fld'] = 'ApplicationId';
+            $_REQUEST['fld'] = 'Code';
         }
         if (!isset($_REQUEST['dt'])) {
-            $_REQUEST['dt'] = 'SMALLINT(5) UNSIGNED';
+            $_REQUEST['dt'] = 'CHAR(6)';
         }
         return [
             'Database'    => filter_var($_REQUEST['db'], FILTER_SANITIZE_STRING),
