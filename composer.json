@@ -17,8 +17,8 @@
     },
     "autoload": {
         "classmap": [
-            "source/configurationMySQL.php",
-            "source/configurationForAction.php",
+            "source/ConfigurationMySQL.php",
+            "source/ConfigurationForAction.php",
             "source/FKchange.php"
         ]
     },

@@ -184,7 +184,7 @@ class FKchange
         ];
     }
 
-    private function recreateFKs($elToModify, $targetTableTextFields, $colDetails)
+    private function recreateFKs($elToModify, $targetTableTextFields)
     {
         $sReturn = [];
         foreach ($targetTableTextFields as $key => $value) {
