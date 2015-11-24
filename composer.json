@@ -10,9 +10,10 @@
         }
     ],
     "require": {
-        "danielgp/common-lib": "*",
+        "php": ">=5.5",
         "ext-mysqli": "*",
-        "php": ">=5.5"
+        "danielgp/common-lib": ">=1.12.2",
+        "danielgp/common-styles": ">=1.0.1"
     },
     "autoload": {
         "classmap": [

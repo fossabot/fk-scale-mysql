@@ -28,15 +28,15 @@
 
 namespace danielgp\fk_scale_mysql;
 
-trait configurationMySQL
+trait ConfigurationMySQL
 {
 
     protected function configuredMySqlServer()
     {
         return [
-            'database' => 'mysql',
+            'database' => 'information_schema',
             'host'     => 'localhost',
-            'password' => '',
+            'password' => 'GheorgheJR',
             'port'     => 3306,
             'username' => 'root',
             'verbose'  => 'MySQL @ localhost',

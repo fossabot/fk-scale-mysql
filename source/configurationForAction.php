@@ -28,16 +28,28 @@
 
 namespace danielgp\fk_scale_mysql;
 
-trait configurationForAction
+trait ConfigurationForAction
 {
 
     protected function targetElementsToModify()
     {
+        if (!isset($_REQUEST['db'])) {
+            $_REQUEST['db'] = 'usefull_security';
+        }
+        if (!isset($_REQUEST['tbl'])) {
+            $_REQUEST['tbl'] = 'user_application';
+        }
+        if (!isset($_REQUEST['fld'])) {
+            $_REQUEST['fld'] = 'ApplicationId';
+        }
+        if (!isset($_REQUEST['dt'])) {
+            $_REQUEST['dt'] = 'SMALLINT(5) UNSIGNED';
+        }
         return [
-            'Database'    => 'usefull_security',
-            'Table'       => 'user_application',
-            'Column'      => 'ApplicationId',
-            'NewDataType' => 'SMALLINT(5) UNSIGNED',
+            'Database'    => filter_var($_REQUEST['db'], FILTER_SANITIZE_STRING),
+            'Table'       => filter_var($_REQUEST['tbl'], FILTER_SANITIZE_STRING),
+            'Column'      => filter_var($_REQUEST['fld'], FILTER_SANITIZE_STRING),
+            'NewDataType' => filter_var($_REQUEST['dt'], FILTER_SANITIZE_STRING),
         ];
     }
 }
