@@ -45,6 +45,7 @@ class FKchange
 
     public function __construct()
     {
+        $this->applicationSpecificArray['Title'] = 'Foreign Keys Scale in MySQL';
         echo $this->setHeaderCommon([
             'css'        => [
                 'css/fk_scale_mysql.css',
@@ -53,16 +54,18 @@ class FKchange
                 'vendor/danielgp/common-lib/js/tabber/tabber-management.min.js',
                 'vendor/danielgp/common-lib/js/tabber/tabber.min.js',
             ],
+            'lang'       => 'en-US',
+            'title'      => $this->applicationSpecificArray['Title'],
         ]);
-        $mysqlConfig           = $this->configuredMySqlServer();
+        $mysqlConfig                             = $this->configuredMySqlServer();
         echo $this->setTitle();
-        $elToModify            = $this->targetElementsToModify();
+        $elToModify                              = $this->targetElementsToModify();
         echo '<div class="tabber" id="tabberFKscaleMySQL">';
         echo '<div class="tabbertab" id="FKscaleMySQLparameters" title="Parameters for scaling">'
         . $this->setInputFormForFKscaling($mysqlConfig)
         . '</div><!-- end of Parameters tab -->';
-        $mConnection           = $this->connectToMySql($mysqlConfig);
-        $targetTableTextFields = $this->getForeignKeys($elToModify);
+        $mConnection                             = $this->connectToMySql($mysqlConfig);
+        $targetTableTextFields                   = $this->getForeignKeys($elToModify);
         echo '<div class="tabbertab" id="FKscaleMySQLresults" title="Results">';
         if (is_array($targetTableTextFields)) {
             echo $this->createDropForignKeysAndGetTargetColumnDefinition($targetTableTextFields);
@@ -285,8 +288,6 @@ class FKchange
 
     private function setTitle()
     {
-        $sReturn   = [];
-        $sReturn[] = '<h1>Forign Keys Scale in MySQL</h1>';
-        return implode('', $sReturn);
+        return '<h1>' . $this->applicationSpecificArray['Title'] . '</h1>';
     }
 }
