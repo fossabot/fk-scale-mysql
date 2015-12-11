@@ -11,4 +11,3 @@ In order to use this package following steps have to be followed:
 Final remark: This packages only analyze (not a single modification is performed) and only provides sequence of query to make neccesary scaling (up or down) of Foreign Keys in MySQL databases starting from a combination of a Database/Table/Column!
 
 (https://github.com/danielgp/fk-scale-mysql)
- 
