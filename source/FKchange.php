@@ -165,7 +165,7 @@ class FKchange
         return $this->setMySQLquery2Server($q, 'full_array_key_numbered')['result'];
     }
 
-    private function packParameteresForMainChangeColumn($elToModify, $targetTableTextFields, $col)
+    private function packParameteresForMainChangeColumn($elToModify, $targetTableTextFields)
     {
         $colToIdentify = [
             'TABLE_SCHEMA' => $elToModify['Database'],
