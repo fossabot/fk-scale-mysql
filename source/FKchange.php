@@ -56,17 +56,26 @@ class FKchange
             ],
             'lang'       => 'en-US',
             'title'      => $this->applicationSpecificArray['Title'],
-        ]);
+        ])
+        . $this->setTitle();
         $mysqlConfig                             = $this->configuredMySqlServer();
-        echo $this->setTitle();
         $elToModify                              = $this->targetElementsToModify();
-        echo '<div class="tabber" id="tabberFKscaleMySQL">';
-        echo '<div class="tabbertab" id="FKscaleMySQLparameters" title="Parameters for scaling">'
-        . $this->setInputFormForFKscaling($mysqlConfig)
+        if (isset($_REQUEST['db']) && isset($_REQUEST['tbl']) && isset($_REQUEST['fld']) && isset($_REQUEST['dt'])) {
+            $transmitedParameters = true;
+        } else {
+            $transmitedParameters = false;
+        }
+        echo '<div class="tabber" id="tabberFKscaleMySQL">'
+        . '<div class="tabbertab'
+        . ($transmitedParameters ? '' : 'tabbertabdefault')
+        . '" id="FKscaleMySQLparameters" title="Parameters for scaling">'
+        . $this->buildInputFormForFKscaling($mysqlConfig)
         . '</div><!-- end of Parameters tab -->';
-        $mConnection                             = $this->connectToMySql($mysqlConfig);
-        $targetTableTextFields                   = $this->getForeignKeys($elToModify);
-        echo '<div class="tabbertab" id="FKscaleMySQLresults" title="Results">';
+        $mConnection           = $this->connectToMySql($mysqlConfig);
+        $targetTableTextFields = $this->getForeignKeys($elToModify);
+        echo '<div class="tabbertab'
+        . ($transmitedParameters ? 'tabbertabdefault' : '')
+        . '" id="FKscaleMySQLresults" title="Results">';
         if (is_array($targetTableTextFields)) {
             echo $this->createDropForignKeysAndGetTargetColumnDefinition($targetTableTextFields);
             $mainColArray = $this->packParameteresForMainChangeColumn($elToModify, $targetTableTextFields);
@@ -92,6 +101,46 @@ class FKchange
     public function __destruct()
     {
         echo $this->setFooterCommon();
+    }
+
+    private function buildInputFormForFKscaling($mysqlConfig)
+    {
+        $sReturn             = [];
+        $sReturn[]           = '<label for="dbName">Database name to analyze:</label>'
+                . '<input type="text" id="dbName" name="db" placeholder="database name" '
+                . $this->returnInputsCleaned('db')
+                . 'size="30" maxlength="64" class="labell" />';
+        $sReturn[]           = '<label for="tblName">Table name to analyze:</label>'
+                . '<input type="text" id="tblName" name="tbl" placeholder="table name" '
+                . $this->returnInputsCleaned('tbl')
+                . ' size="30" maxlength="64" class="labell" />';
+        $sReturn[]           = '<label for="fldName">Field name to analyze:</label>'
+                . '<input type="text" id="fldName" name="fld" placeholder="field name" '
+                . $this->returnInputsCleaned('fld')
+                . ' size="30" maxlength="64" class="labell" />';
+        $sReturn[]           = '<label for="dataType">Data type to change to:</label>'
+                . '<input type="text" id="dataType" name="dt" placeholder="valid data type" '
+                . $this->returnInputsCleaned('dt')
+                . ' size="30" maxlength="64" class="labell" />';
+        $sReturn[]           = '<input type="submit" value="Generate SQL queries for scaling" />';
+        $styleForMySQLparams = 'color:green;font-weight:bold;font-style:italic;';
+        $sReturn[]           = '<p>For security reasons the MySQL connection details are not available '
+                . 'to be set/modified through the interface and must be set directly '
+                . 'into the "configurationMySQL.php" file. Currently these settings are:<ul>'
+                . '<li>Host name where MySQL server resides: <span style="' . $styleForMySQLparams . '">'
+                . $mysqlConfig['host'] . '</span></li>'
+                . '<li>MySQL port used: <span style="' . $styleForMySQLparams . '">'
+                . $mysqlConfig['port'] . '</span></li>'
+                . '<li>MySQL database to connect to: <span style="' . $styleForMySQLparams . '">'
+                . $mysqlConfig['database'] . '</span></li>'
+                . '<li>MySQL username used: <span style="' . $styleForMySQLparams . '">'
+                . $mysqlConfig['username'] . '</span></li>'
+                . '<li>MySQL password used: <span style="' . $styleForMySQLparams . '">'
+                . 'cannot be disclosed due to security reasons</span></li>'
+                . '</ul></p>';
+        return '<form method="get" action="' . $_REQUEST['PHP_SELF'] . '">'
+                . implode('<br/>', $sReturn)
+                . '</form>';
     }
 
     private function createChangeColumn($parameters, $aditionalFeatures = null)
@@ -244,46 +293,6 @@ class FKchange
                 break;
         }
         return $columnDefinitionAdditional;
-    }
-
-    private function setInputFormForFKscaling($mysqlConfig)
-    {
-        $sReturn             = [];
-        $sReturn[]           = '<label for="dbName">Database name to analyze:</label>'
-                . '<input type="text" id="dbName" name="db" placeholder="database name" '
-                . $this->returnInputsCleaned('db')
-                . 'size="30" maxlength="64" class="labell" />';
-        $sReturn[]           = '<label for="tblName">Table name to analyze:</label>'
-                . '<input type="text" id="tblName" name="tbl" placeholder="table name" '
-                . $this->returnInputsCleaned('tbl')
-                . ' size="30" maxlength="64" class="labell" />';
-        $sReturn[]           = '<label for="fldName">Field name to analyze:</label>'
-                . '<input type="text" id="fldName" name="fld" placeholder="field name" '
-                . $this->returnInputsCleaned('fld')
-                . ' size="30" maxlength="64" class="labell" />';
-        $sReturn[]           = '<label for="dataType">Data type to change to:</label>'
-                . '<input type="text" id="dataType" name="dt" placeholder="valid data type" '
-                . $this->returnInputsCleaned('dt')
-                . ' size="30" maxlength="64" class="labell" />';
-        $sReturn[]           = '<input type="submit" value="Generate SQL queries for scaling" />';
-        $styleForMySQLparams = 'color:green;font-weight:bold;font-style:italic;';
-        $sReturn[]           = '<p>For security reasons the MySQL connection details are not available '
-                . 'to be set/modified through the interface and must be set directly '
-                . 'into the "configurationMySQL.php" file. Currently these settings are:<ul>'
-                . '<li>Host name where MySQL server resides: <span style="' . $styleForMySQLparams . '">'
-                . $mysqlConfig['host'] . '</span></li>'
-                . '<li>MySQL port used: <span style="' . $styleForMySQLparams . '">'
-                . $mysqlConfig['port'] . '</span></li>'
-                . '<li>MySQL database to connect to: <span style="' . $styleForMySQLparams . '">'
-                . $mysqlConfig['database'] . '</span></li>'
-                . '<li>MySQL username used: <span style="' . $styleForMySQLparams . '">'
-                . $mysqlConfig['username'] . '</span></li>'
-                . '<li>MySQL password used: <span style="' . $styleForMySQLparams . '">'
-                . 'cannot be disclosed due to security reasons</span></li>'
-                . '</ul></p>';
-        return '<form method="get" action="' . $_REQUEST['PHP_SELF'] . '">'
-                . implode('<br/>', $sReturn)
-                . '</form>';
     }
 
     private function setTitle()
