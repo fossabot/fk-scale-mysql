@@ -1,0 +1,1 @@
+composer update --profile --no-dev --verbose
