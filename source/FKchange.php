@@ -112,7 +112,7 @@ class FKchange
         return implode('', $sReturn);
     }
 
-    private function buildApplicationTitle()
+    private function buildApplicationTitle($pageTitle)
     {
         return '<h1>' . $pageTitle . '</h1>';
     }
