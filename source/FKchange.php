@@ -45,19 +45,7 @@ class FKchange
 
     public function __construct()
     {
-        $pageTitle = 'Foreign Keys Scale in MySQL';
-        echo $this->buildApplicationHeader($pageTitle)
-        . $this->buildApplicationTitle($pageTitle)
-        . $this->buildApplicationInterface();
-    }
-
-    public function __destruct()
-    {
-        echo $this->setFooterCommon();
-    }
-
-    private function buildApplicationHeader($pageTitle)
-    {
+        $pageTitle   = 'Foreign Keys Scale in MySQL';
         $headerArray = [
             'css'        => [
                 'css/fk_scale_mysql.css',
@@ -69,24 +57,30 @@ class FKchange
             'lang'       => 'en-US',
             'title'      => $pageTitle,
         ];
-        return $this->setHeaderCommon($headerArray);
+        echo $this->setHeaderCommon($headerArray)
+        . '<h1>' . $pageTitle . '</h1>'
+        . $this->buildApplicationInterface()
+        . $this->setFooterCommon();
     }
 
     private function buildApplicationInterface()
     {
         $mysqlConfig          = $this->configuredMySqlServer();
         $elToModify           = $this->targetElementsToModify();
-        $transmitedParameters = $this->hasParameters();
-        $sReturn              = [];
-        $sReturn[]            = '<div class="tabber" id="tabberFKscaleMySQL">'
+        $transmitedParameters = false;
+        if (isset($_REQUEST['db']) && isset($_REQUEST['tbl']) && isset($_REQUEST['fld']) && isset($_REQUEST['dt'])) {
+            $transmitedParameters = true;
+        }
+        $sReturn             = [];
+        $sReturn[]           = '<div class="tabber" id="tabberFKscaleMySQL">'
                 . '<div class="tabbertab'
                 . ($transmitedParameters ? '' : 'tabbertabdefault')
                 . '" id="FKscaleMySQLparameters" title="Parameters for scaling">'
                 . $this->buildInputFormForFKscaling($mysqlConfig)
                 . '</div><!-- end of Parameters tab -->';
-        $mConnection          = $this->connectToMySql($mysqlConfig);
-        $targetTableTextFlds  = $this->getForeignKeys($elToModify);
-        $sReturn[]            = '<div class="tabbertab'
+        $mConnection         = $this->connectToMySql($mysqlConfig);
+        $targetTableTextFlds = $this->getForeignKeys($elToModify);
+        $sReturn[]           = '<div class="tabbertab'
                 . ($transmitedParameters ? 'tabbertabdefault' : '')
                 . '" id="FKscaleMySQLresults" title="Results">';
         if (is_array($targetTableTextFlds)) {
@@ -110,11 +104,6 @@ class FKchange
         $sReturn[] = '</div><!-- end of FKscaleMySQLresults tab -->'
                 . '</div><!-- tabberFKscaleMySQL -->';
         return implode('', $sReturn);
-    }
-
-    private function buildApplicationTitle($pageTitle)
-    {
-        return '<h1>' . $pageTitle . '</h1>';
     }
 
     private function buildInputFormForFKscaling($mysqlConfig)
@@ -152,7 +141,8 @@ class FKchange
                 . '<li>MySQL password used: <span style="' . $styleForMySQLparams . '">'
                 . 'cannot be disclosed due to security reasons</span></li>'
                 . '</ul></p>';
-        return '<form method="get" action="' . $_REQUEST['PHP_SELF'] . '">'
+        $thisPage            = filter_var($_REQUEST['PHP_SELF'], FILTER_SANITIZE_URL);
+        return '<form method="get" action="' . $thisPage . '">'
                 . implode('<br/>', $sReturn)
                 . '</form>';
     }
@@ -228,15 +218,6 @@ class FKchange
         return $this->setMySQLquery2Server($query, 'full_array_key_numbered')['result'];
     }
 
-    private function hasParameters()
-    {
-        $transmitedParameters = false;
-        if (isset($_REQUEST['db']) && isset($_REQUEST['tbl']) && isset($_REQUEST['fld']) && isset($_REQUEST['dt'])) {
-            $transmitedParameters = true;
-        }
-        return $transmitedParameters;
-    }
-
     private function packParameteresForMainChangeColumn($elToModify, $targetTableTextFlds)
     {
         $colToIdentify = [
@@ -302,19 +283,19 @@ class FKchange
         switch ($nullableYesNo) {
             case 'NO':
                 if ($defaultValue === null) {
-                    $columnDefinitionAdtnl = 'NOT NULL';
+                    $columnDefAdtnl = 'NOT NULL';
                 } else {
-                    $columnDefinitionAdtnl = 'NOT NULL DEFAULT "' . $defaultValue . '"';
+                    $columnDefAdtnl = 'NOT NULL DEFAULT "' . $defaultValue . '"';
                 }
                 break;
             case 'YES':
                 if ($defaultValue === null) {
-                    $columnDefinitionAdtnl = 'DEFAULT NULL';
+                    $columnDefAdtnl = 'DEFAULT NULL';
                 } else {
-                    $columnDefinitionAdtnl = 'DEFAULT "' . $defaultValue . '"';
+                    $columnDefAdtnl = 'DEFAULT "' . $defaultValue . '"';
                 }
                 break;
         }
-        return $columnDefinitionAdtnl;
+        return $columnDefAdtnl;
     }
 }
