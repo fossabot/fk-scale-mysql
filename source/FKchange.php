@@ -155,7 +155,7 @@ class FKchange
                 . 'ALTER TABLE `' . $parameters['Database'] . '`.`' . $parameters['Table']
                 . '` CHANGE `' . $parameters['Column'] . '` `' . $parameters['Column'] . '` '
                 . $parameters['NewDataType'] . ' '
-                . $this->setColumnDefinitionAdtnl($parameters['IsNullable'], $parameters['Default'])
+                . $this->setColumnDefinitionAditional($parameters['IsNullable'], $parameters['Default'])
                 . (strlen($parameters['Extra']) > 0 ? ' AUTO_INCREMENT' : '')
                 . (strlen($parameters['Comment']) > 0 ? ' COMMENT "' . $parameters['Comment'] . '"' : '')
                 . ';'
@@ -231,7 +231,7 @@ class FKchange
             'Table'       => $targetTableTextFlds[0]['REFERENCED_TABLE_NAME'],
             'Column'      => $targetTableTextFlds[0]['REFERENCED_COLUMN_NAME'],
             'OldDataType' => strtoupper($col[0]['COLUMN_TYPE']) . ' '
-            . $this->setColumnDefinitionAdtnl($col[0]['IS_NULLABLE'], $col[0]['COLUMN_DEFAULT']),
+            . $this->setColumnDefinitionAditional($col[0]['IS_NULLABLE'], $col[0]['COLUMN_DEFAULT']),
             'NewDataType' => $elToModify['NewDataType'],
             'IsNullable'  => $this->applicationSpecificArray['Cols'][0]['IS_NULLABLE'],
             'Default'     => $this->applicationSpecificArray['Cols'][0]['COLUMN_DEFAULT'],
@@ -278,8 +278,9 @@ class FKchange
         return $sReturn;
     }
 
-    private function setColumnDefinitionAdtnl($nullableYesNo, $defaultValue)
+    private function setColumnDefinitionAditional($nullableYesNo, $defaultValue)
     {
+        $defaultValue = '';
         switch ($nullableYesNo) {
             case 'NO':
                 if ($defaultValue === null) {
