@@ -2,6 +2,12 @@
 Scaling up the column type for fields used in foreign keys in MySQL can be a daunting activity, now this will be no more!
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/c392dde2-7f81-413c-9c80-da48a3a4b89c/big.png)](https://insight.sensiolabs.com/projects/c392dde2-7f81-413c-9c80-da48a3a4b89c)
+[![Latest Stable Version](https://poser.pugx.org/danielgp/fk-scale-mysql/v/stable)](https://packagist.org/packages/danielgp/fk-scale-mysql)
+[![Total Downloads](https://poser.pugx.org/danielgp/fk-scale-mysql/downloads)](https://packagist.org/packages/danielgp/fk-scale-mysql)
+[![License](https://poser.pugx.org/danielgp/fk-scale-mysql/license)](https://packagist.org/packages/danielgp/fk-scale-mysql)
+[![License](https://poser.pugx.org/danielgp/fk-scale-mysql/license)](https://packagist.org/packages/danielgp/fk-scale-mysql)
+[![Daily Downloads](https://poser.pugx.org/danielgp/fk-scale-mysql/d/daily)](https://packagist.org/packages/danielgp/fk-scale-mysql)
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/83e1087fbff94479b333fdd32b74bcc8)](https://www.codacy.com/app/danielpopiniuc/fk-scale-mysql)
 
 In order to use this package following steps have to be followed:
 - Make sure you have installed Composer (https://getcomposer.org/doc/00-intro.md) as the used libraries are not distributed by default in the package on GitHub;
