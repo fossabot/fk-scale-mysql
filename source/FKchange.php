@@ -45,8 +45,20 @@ class FKchange
 
     public function __construct()
     {
-        $this->applicationSpecificArray['Title'] = 'Foreign Keys Scale in MySQL';
-        echo $this->setHeaderCommon([
+        $pageTitle = 'Foreign Keys Scale in MySQL';
+        echo $this->buildApplicationHeader($pageTitle)
+        . $this->buildApplicationTitle($pageTitle)
+        . $this->buildApplicationInterface();
+    }
+
+    public function __destruct()
+    {
+        echo $this->setFooterCommon();
+    }
+
+    private function buildApplicationHeader($pageTitle)
+    {
+        $headerArray = [
             'css'        => [
                 'css/fk_scale_mysql.css',
             ],
@@ -55,52 +67,54 @@ class FKchange
                 'vendor/danielgp/common-lib/js/tabber/tabber.min.js',
             ],
             'lang'       => 'en-US',
-            'title'      => $this->applicationSpecificArray['Title'],
-        ])
-        . $this->setTitle();
-        $mysqlConfig                             = $this->configuredMySqlServer();
-        $elToModify                              = $this->targetElementsToModify();
-        if (isset($_REQUEST['db']) && isset($_REQUEST['tbl']) && isset($_REQUEST['fld']) && isset($_REQUEST['dt'])) {
-            $transmitedParameters = true;
-        } else {
-            $transmitedParameters = false;
-        }
-        echo '<div class="tabber" id="tabberFKscaleMySQL">'
-        . '<div class="tabbertab'
-        . ($transmitedParameters ? '' : 'tabbertabdefault')
-        . '" id="FKscaleMySQLparameters" title="Parameters for scaling">'
-        . $this->buildInputFormForFKscaling($mysqlConfig)
-        . '</div><!-- end of Parameters tab -->';
-        $mConnection           = $this->connectToMySql($mysqlConfig);
-        $targetTableTextFields = $this->getForeignKeys($elToModify);
-        echo '<div class="tabbertab'
-        . ($transmitedParameters ? 'tabbertabdefault' : '')
-        . '" id="FKscaleMySQLresults" title="Results">';
-        if (is_array($targetTableTextFields)) {
-            echo $this->createDropForignKeysAndGetTargetColumnDefinition($targetTableTextFields);
-            $mainColArray = $this->packParameteresForMainChangeColumn($elToModify, $targetTableTextFields);
-            echo $this->createChangeColumn($mainColArray, [
+            'title'      => $pageTitle,
+        ];
+        return $this->setHeaderCommon($headerArray);
+    }
+
+    private function buildApplicationInterface()
+    {
+        $mysqlConfig          = $this->configuredMySqlServer();
+        $elToModify           = $this->targetElementsToModify();
+        $transmitedParameters = $this->hasParameters();
+        $sReturn              = [];
+        $sReturn[]            = '<div class="tabber" id="tabberFKscaleMySQL">'
+                . '<div class="tabbertab'
+                . ($transmitedParameters ? '' : 'tabbertabdefault')
+                . '" id="FKscaleMySQLparameters" title="Parameters for scaling">'
+                . $this->buildInputFormForFKscaling($mysqlConfig)
+                . '</div><!-- end of Parameters tab -->';
+        $mConnection          = $this->connectToMySql($mysqlConfig);
+        $targetTableTextFlds  = $this->getForeignKeys($elToModify);
+        $sReturn[]            = '<div class="tabbertab'
+                . ($transmitedParameters ? 'tabbertabdefault' : '')
+                . '" id="FKscaleMySQLresults" title="Results">';
+        if (is_array($targetTableTextFlds)) {
+            $sReturn[]    = $this->createDropForignKeysAndGetTargetColumnDefinition($targetTableTextFlds);
+            $mainColArray = $this->packParameteresForMainChangeColumn($elToModify, $targetTableTextFlds);
+            $sReturn[]    = $this->createChangeColumn($mainColArray, [
                 'style'                => 'color:blue;font-weight:bold;',
                 'includeOldColumnType' => true,
             ]);
-            echo $this->recreateFKs($elToModify, $targetTableTextFields);
+            $sReturn[]    = $this->recreateFKs($elToModify, $targetTableTextFlds);
         } else {
             if (strlen($mConnection) === 0) {
-                echo '<p style="color:red;">Check if provided parameters are correct '
-                . 'as the combination of Database. Table and Column name were not found as a Foreign Key!</p>';
+                $sReturn[] = '<p style="color:red;">Check if provided parameters are correct '
+                        . 'as the combination of Database. Table and Column name were not found as a Foreign Key!</p>';
             } else {
-                echo '<p style="color:red;">Check your "configurationMySQL.php" file '
-                . 'for correct MySQL connection parameters '
-                . 'as the current ones were not able to be used to establish a connection!</p>';
+                $sReturn[] = '<p style="color:red;">Check your "configurationMySQL.php" file '
+                        . 'for correct MySQL connection parameters '
+                        . 'as the current ones were not able to be used to establish a connection!</p>';
             }
         }
-        echo '</div><!-- end of FKscaleMySQLresults tab -->'
-        . '</div><!-- tabberFKscaleMySQL -->';
+        $sReturn[] = '</div><!-- end of FKscaleMySQLresults tab -->'
+                . '</div><!-- tabberFKscaleMySQL -->';
+        return implode('', $sReturn);
     }
 
-    public function __destruct()
+    private function buildApplicationTitle()
     {
-        echo $this->setFooterCommon();
+        return '<h1>' . $pageTitle . '</h1>';
     }
 
     private function buildInputFormForFKscaling($mysqlConfig)
@@ -151,7 +165,7 @@ class FKchange
                 . 'ALTER TABLE `' . $parameters['Database'] . '`.`' . $parameters['Table']
                 . '` CHANGE `' . $parameters['Column'] . '` `' . $parameters['Column'] . '` '
                 . $parameters['NewDataType'] . ' '
-                . $this->setColumnDefinitionAdditional($parameters['IsNullable'], $parameters['Default'])
+                . $this->setColumnDefinitionAdtnl($parameters['IsNullable'], $parameters['Default'])
                 . (strlen($parameters['Extra']) > 0 ? ' AUTO_INCREMENT' : '')
                 . (strlen($parameters['Comment']) > 0 ? ' COMMENT "' . $parameters['Comment'] . '"' : '')
                 . ';'
@@ -169,10 +183,10 @@ class FKchange
                 . '</div>';
     }
 
-    private function createDropForignKeysAndGetTargetColumnDefinition($targetTableTextFields)
+    private function createDropForignKeysAndGetTargetColumnDefinition($targetTableTextFlds)
     {
         $sReturn = [];
-        foreach ($targetTableTextFields as $key => $value) {
+        foreach ($targetTableTextFlds as $key => $value) {
             $sReturn[]                                    = $this->createDropForeignKey([
                 'Database'       => $value['TABLE_SCHEMA'],
                 'Table'          => $value['TABLE_NAME'],
@@ -210,11 +224,20 @@ class FKchange
             'REFERENCED_COLUMN_NAME'  => $elToModify['Column'],
             'REFERENCED_TABLE_NAME'   => 'NOT NULL',
         ];
-        $q                  = $this->sQueryMySqlIndexes($additionalFeatures);
-        return $this->setMySQLquery2Server($q, 'full_array_key_numbered')['result'];
+        $query              = $this->sQueryMySqlIndexes($additionalFeatures);
+        return $this->setMySQLquery2Server($query, 'full_array_key_numbered')['result'];
     }
 
-    private function packParameteresForMainChangeColumn($elToModify, $targetTableTextFields)
+    private function hasParameters()
+    {
+        $transmitedParameters = false;
+        if (isset($_REQUEST['db']) && isset($_REQUEST['tbl']) && isset($_REQUEST['fld']) && isset($_REQUEST['dt'])) {
+            $transmitedParameters = true;
+        }
+        return $transmitedParameters;
+    }
+
+    private function packParameteresForMainChangeColumn($elToModify, $targetTableTextFlds)
     {
         $colToIdentify = [
             'TABLE_SCHEMA' => $elToModify['Database'],
@@ -223,11 +246,11 @@ class FKchange
         ];
         $col           = $this->getMySQLlistColumns($colToIdentify);
         return [
-            'Database'    => $targetTableTextFields[0]['REFERENCED_TABLE_SCHEMA'],
-            'Table'       => $targetTableTextFields[0]['REFERENCED_TABLE_NAME'],
-            'Column'      => $targetTableTextFields[0]['REFERENCED_COLUMN_NAME'],
+            'Database'    => $targetTableTextFlds[0]['REFERENCED_TABLE_SCHEMA'],
+            'Table'       => $targetTableTextFlds[0]['REFERENCED_TABLE_NAME'],
+            'Column'      => $targetTableTextFlds[0]['REFERENCED_COLUMN_NAME'],
             'OldDataType' => strtoupper($col[0]['COLUMN_TYPE']) . ' '
-            . $this->setColumnDefinitionAdditional($col[0]['IS_NULLABLE'], $col[0]['COLUMN_DEFAULT']),
+            . $this->setColumnDefinitionAdtnl($col[0]['IS_NULLABLE'], $col[0]['COLUMN_DEFAULT']),
             'NewDataType' => $elToModify['NewDataType'],
             'IsNullable'  => $this->applicationSpecificArray['Cols'][0]['IS_NULLABLE'],
             'Default'     => $this->applicationSpecificArray['Cols'][0]['COLUMN_DEFAULT'],
@@ -236,10 +259,10 @@ class FKchange
         ];
     }
 
-    private function recreateFKs($elToModify, $targetTableTextFields)
+    private function recreateFKs($elToModify, $targetTableTextFlds)
     {
         $sReturn = [];
-        foreach ($targetTableTextFields as $key => $value) {
+        foreach ($targetTableTextFlds as $key => $value) {
             $sReturn[] = $this->createChangeColumn([
                 'Database'    => $value['TABLE_SCHEMA'],
                 'Table'       => $value['TABLE_NAME'],
@@ -274,29 +297,24 @@ class FKchange
         return $sReturn;
     }
 
-    private function setColumnDefinitionAdditional($nullableYesNo, $defaultValue)
+    private function setColumnDefinitionAdtnl($nullableYesNo, $defaultValue)
     {
         switch ($nullableYesNo) {
             case 'NO':
                 if ($defaultValue === null) {
-                    $columnDefinitionAdditional = 'NOT NULL';
+                    $columnDefinitionAdtnl = 'NOT NULL';
                 } else {
-                    $columnDefinitionAdditional = 'NOT NULL DEFAULT "' . $defaultValue . '"';
+                    $columnDefinitionAdtnl = 'NOT NULL DEFAULT "' . $defaultValue . '"';
                 }
                 break;
             case 'YES':
                 if ($defaultValue === null) {
-                    $columnDefinitionAdditional = 'DEFAULT NULL';
+                    $columnDefinitionAdtnl = 'DEFAULT NULL';
                 } else {
-                    $columnDefinitionAdditional = 'DEFAULT "' . $defaultValue . '"';
+                    $columnDefinitionAdtnl = 'DEFAULT "' . $defaultValue . '"';
                 }
                 break;
         }
-        return $columnDefinitionAdditional;
-    }
-
-    private function setTitle()
-    {
-        return '<h1>' . $this->applicationSpecificArray['Title'] . '</h1>';
+        return $columnDefinitionAdtnl;
     }
 }
