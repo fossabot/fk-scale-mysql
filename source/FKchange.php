@@ -71,20 +71,20 @@ class FKchange
         if (isset($_REQUEST['db']) && isset($_REQUEST['tbl']) && isset($_REQUEST['fld']) && isset($_REQUEST['dt'])) {
             $transmitedParameters = true;
         }
+        $mConnection         = $this->connectToMySql($mysqlConfig);
         $sReturn             = [];
         $sReturn[]           = '<div class="tabber" id="tabberFKscaleMySQL">'
                 . '<div class="tabbertab'
-                . ($transmitedParameters ? '' : 'tabbertabdefault')
+                . ($transmitedParameters ? '' : ' tabbertabdefault')
                 . '" id="FKscaleMySQLparameters" title="Parameters for scaling">'
                 . $this->buildInputFormForFKscaling($mysqlConfig)
                 . '</div><!-- end of Parameters tab -->';
-        $mConnection         = $this->connectToMySql($mysqlConfig);
         $targetTableTextFlds = $this->getForeignKeys($elToModify);
         $sReturn[]           = '<div class="tabbertab'
-                . ($transmitedParameters ? 'tabbertabdefault' : '')
+                . ($transmitedParameters ? ' tabbertabdefault' : '')
                 . '" id="FKscaleMySQLresults" title="Results">';
         if (is_array($targetTableTextFlds)) {
-            $sReturn[]    = $this->createDropForignKeysAndGetTargetColumnDefinition($targetTableTextFlds);
+            $sReturn[]    = $this->createDropForeignKeysAndGetTargetColumnDefinition($targetTableTextFlds);
             $mainColArray = $this->packParameteresForMainChangeColumn($elToModify, $targetTableTextFlds);
             $sReturn[]    = $this->createChangeColumn($mainColArray, [
                 'style'                => 'color:blue;font-weight:bold;',
@@ -173,7 +173,7 @@ class FKchange
                 . '</div>';
     }
 
-    private function createDropForignKeysAndGetTargetColumnDefinition($targetTableTextFlds)
+    private function createDropForeignKeysAndGetTargetColumnDefinition($targetTableTextFlds)
     {
         $sReturn = [];
         foreach ($targetTableTextFlds as $key => $value) {
@@ -231,12 +231,12 @@ class FKchange
             'Table'       => $targetTableTextFlds[0]['REFERENCED_TABLE_NAME'],
             'Column'      => $targetTableTextFlds[0]['REFERENCED_COLUMN_NAME'],
             'OldDataType' => strtoupper($col[0]['COLUMN_TYPE']) . ' '
-            . $this->setColumnDefinitionAditional($col[0]['IS_NULLABLE'], $col[0]['COLUMN_DEFAULT']),
+            . $this->setColumnDefinitionAditional($col[0]['IS_NULLABLE'], $col[0]['COLUMN_DEFAULT'], $col[0]['EXTRA']),
             'NewDataType' => $elToModify['NewDataType'],
-            'IsNullable'  => $this->applicationSpecificArray['Cols'][0]['IS_NULLABLE'],
-            'Default'     => $this->applicationSpecificArray['Cols'][0]['COLUMN_DEFAULT'],
-            'Extra'       => $this->applicationSpecificArray['Cols'][0]['EXTRA'],
-            'Comment'     => $this->applicationSpecificArray['Cols'][0]['COLUMN_COMMENT'],
+            'IsNullable'  => $col[0]['IS_NULLABLE'],
+            'Default'     => $col[0]['COLUMN_DEFAULT'],
+            'Extra'       => $col[0]['EXTRA'],
+            'Comment'     => $col[0]['COLUMN_COMMENT'],
         ];
     }
 
@@ -256,7 +256,7 @@ class FKchange
             ]);
             $sReturn[] = $this->createForeignKey([
                 'Database'           => $value['TABLE_SCHEMA'],
-                'Table'              => $value['TABLE_NAME'],
+                'Table'               => $value['TABLE_NAME'],
                 'Column'             => $value['COLUMN_NAME'],
                 'ForeignKeyName'     => $value['CONSTRAINT_NAME'],
                 'ReferencedDatabase' => $value['REFERENCED_TABLE_SCHEMA'],
@@ -278,9 +278,8 @@ class FKchange
         return $sReturn;
     }
 
-    private function setColumnDefinitionAditional($nullableYesNo, $defaultValue)
+    private function setColumnDefinitionAditional($nullableYesNo, $defaultValue = '', $extra = '')
     {
-        $defaultValue = '';
         switch ($nullableYesNo) {
             case 'NO':
                 if ($defaultValue === null) {
@@ -296,6 +295,9 @@ class FKchange
                     $columnDefAdtnl = 'DEFAULT "' . $defaultValue . '"';
                 }
                 break;
+        }
+        if ($extra == 'auto_increment') {
+            $columnDefAdtnl .= ' AUTO_INCREMENT';
         }
         return $columnDefAdtnl;
     }
