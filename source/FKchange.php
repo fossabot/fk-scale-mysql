@@ -282,7 +282,6 @@ class FKchange
 
     private function setColumnDefinitionAditional($nullableYesNo, $defaultValue = '', $extra = '')
     {
-        $columnDefAdtnl = '';
         switch ($nullableYesNo) {
             case 'NO':
                 $columnDefAdtnl = 'NOT NULL DEFAULT "' . $defaultValue . '"';
@@ -297,7 +296,9 @@ class FKchange
                 }
                 break;
         }
-        $columnDefAdtnl .= (($extra == 'auto_increment') ? ' AUTO_INCREMENT' : '');
+        if ($extra == 'auto_increment') {
+            $columnDefAdtnl .= ' AUTO_INCREMENT';
+        }
         return $columnDefAdtnl;
     }
 }
