@@ -37,7 +37,7 @@ trait ConfigurationMySQL
             'database' => 'information_schema',
             'host'     => '127.0.0.1',
             'password' => 'L1K&M[c5bW}wh96*4kPt0Pd>w',
-            'port'     => 3306,
+            'port'     => 5700,
             'username' => 'web_fk_scale',
             'verbose'  => 'MySQL @ localhost',
         ];

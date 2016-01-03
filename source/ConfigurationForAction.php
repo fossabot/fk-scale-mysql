@@ -31,6 +31,8 @@ namespace danielgp\fk_scale_mysql;
 trait ConfigurationForAction
 {
 
+    private $superGlobals;
+
     /**
      * Manages the configuration for parameters to scale FK
      *
@@ -39,25 +41,45 @@ trait ConfigurationForAction
      *
      * @return array
      */
-    protected function targetElementsToModify()
+    protected function targetElementsToModify($inArray)
     {
-        if (!isset($_REQUEST['db'])) {
-            $_REQUEST['db'] = 'world';
-        }
-        if (!isset($_REQUEST['tbl'])) {
-            $_REQUEST['tbl'] = 'country';
-        }
-        if (!isset($_REQUEST['fld'])) {
-            $_REQUEST['fld'] = 'Code';
-        }
-        if (!isset($_REQUEST['dt'])) {
-            $_REQUEST['dt'] = 'CHAR(6)';
-        }
+        $this->superGlobals = $inArray['SuperGlobals'];
         return [
-            'Database'    => filter_var($_REQUEST['db'], FILTER_SANITIZE_STRING),
-            'Table'       => filter_var($_REQUEST['tbl'], FILTER_SANITIZE_STRING),
-            'Column'      => filter_var($_REQUEST['fld'], FILTER_SANITIZE_STRING),
-            'NewDataType' => filter_var($_REQUEST['dt'], FILTER_SANITIZE_STRING),
+            'Database'    => $this->manageInputWithDefaults([
+                'InputName'    => 'db',
+                'DefaultValue' => 'world',
+            ]),
+            'Table'       => $this->manageInputWithDefaults([
+                'InputName'    => 'tbl',
+                'DefaultValue' => 'country',
+            ]),
+            'Column'      => $this->manageInputWithDefaults([
+                'InputName'    => 'fld',
+                'DefaultValue' => 'Code',
+            ]),
+            'NewDataType' => $this->manageInputWithDefaults([
+                'InputName'    => 'dt',
+                'DefaultValue' => 'CHAR(6)',
+            ]),
         ];
+    }
+
+    private function manageInputWithDefaults($inArray)
+    {
+        if (is_null($this->superGlobals->get($inArray['InputName']))) {
+            $this->superGlobals->request->set($inArray['InputName'], $inArray['DefaultValue']);
+        }
+        return filter_var($this->superGlobals->get($inArray['InputName']), FILTER_SANITIZE_STRING);
+    }
+
+    protected function countTransmitedParameters($inParameters)
+    {
+        $transmited = 0;
+        foreach ($inParameters as $parameterName) {
+            if (!is_null($this->superGlobals->get($parameterName))) {
+                $transmited++;
+            }
+        }
+        return (count($inParameters) === $transmited);
     }
 }

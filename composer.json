@@ -13,7 +13,8 @@
         "php":                    ">=5.5",
         "ext-mysqli":             "*",
         "danielgp/common-lib":    ">=1.12.2",
-        "danielgp/common-styles": ">=1.0.1"
+        "danielgp/common-styles": ">=1.0.1",
+        "symfony/http-foundation": ">3.0"
     },
     "autoload": {
         "classmap": [

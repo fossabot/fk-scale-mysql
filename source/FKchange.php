@@ -45,43 +45,26 @@ class FKchange
 
     public function __construct()
     {
-        $pageTitle   = 'Foreign Keys Scale in MySQL';
-        $headerArray = [
-            'css'        => [
-                'css/fk_scale_mysql.css',
-            ],
-            'javascript' => [
-                'vendor/danielgp/common-lib/js/tabber/tabber-management.min.js',
-                'vendor/danielgp/common-lib/js/tabber/tabber.min.js',
-            ],
-            'lang'       => 'en-US',
-            'title'      => $pageTitle,
-        ];
-        echo $this->setHeaderCommon($headerArray)
-        . '<h1>' . $pageTitle . '</h1>'
-        . $this->buildApplicationInterface()
+        $rqst = new \Symfony\Component\HttpFoundation\Request;
+        echo $this->setApplicationHeader()
+        . $this->buildApplicationInterface(['SuperGlobals' => $rqst->createFromGlobals()])
         . $this->setFooterCommon();
     }
 
-    private function buildApplicationInterface()
+    private function buildApplicationInterface($inArray)
     {
         $mysqlConfig          = $this->configuredMySqlServer();
-        $elToModify           = $this->targetElementsToModify();
-        $transmitedParameters = false;
-        if (isset($_REQUEST['db']) && isset($_REQUEST['tbl']) && isset($_REQUEST['fld']) && isset($_REQUEST['dt'])) {
-            $transmitedParameters = true;
-        }
-        $mConnection         = $this->connectToMySql($mysqlConfig);
-        $sReturn             = [];
-        $sReturn[]           = '<div class="tabber" id="tabberFKscaleMySQL">'
-                . '<div class="tabbertab'
-                . ($transmitedParameters ? '' : ' tabbertabdefault')
+        $elToModify           = $this->targetElementsToModify(['SuperGlobals' => $inArray['SuperGlobals']]);
+        $transmitedParameters = $this->countTransmitedParameters(['db', 'tbl', 'fld', 'dt']);
+        $mConnection          = $this->connectToMySql($mysqlConfig);
+        $sReturn              = [];
+        $sReturn[]            = '<div class="tabber" id="tabberFKscaleMySQL">'
+                . '<div class="tabbertab' . ($transmitedParameters ? '' : ' tabbertabdefault')
                 . '" id="FKscaleMySQLparameters" title="Parameters for scaling">'
-                . $this->buildInputFormForFKscaling($mysqlConfig)
+                . $this->buildInputFormForFKscaling($mysqlConfig, ['SuperGlobals' => $inArray['SuperGlobals']])
                 . '</div><!-- end of Parameters tab -->';
-        $targetTableTextFlds = $this->getForeignKeys($elToModify);
-        $sReturn[]           = '<div class="tabbertab'
-                . ($transmitedParameters ? ' tabbertabdefault' : '')
+        $targetTableTextFlds  = $this->getForeignKeys($elToModify);
+        $sReturn[]            = '<div class="tabbertab' . ($transmitedParameters ? ' tabbertabdefault' : '')
                 . '" id="FKscaleMySQLresults" title="Results">';
         if (is_array($targetTableTextFlds)) {
             $sReturn[]    = $this->createDropForeignKeysAndGetTargetColumnDefinition($targetTableTextFlds);
@@ -106,24 +89,24 @@ class FKchange
         return implode('', $sReturn);
     }
 
-    private function buildInputFormForFKscaling($mysqlConfig)
+    private function buildInputFormForFKscaling($mysqlConfig, $inArray)
     {
         $sReturn             = [];
         $sReturn[]           = '<label for="dbName">Database name to analyze:</label>'
                 . '<input type="text" id="dbName" name="db" placeholder="database name" '
-                . $this->returnInputsCleaned('db')
+                . $this->returnInputsCleaned('db', $inArray)
                 . 'size="30" maxlength="64" class="labell" />';
         $sReturn[]           = '<label for="tblName">Table name to analyze:</label>'
                 . '<input type="text" id="tblName" name="tbl" placeholder="table name" '
-                . $this->returnInputsCleaned('tbl')
+                . $this->returnInputsCleaned('tbl', $inArray)
                 . ' size="30" maxlength="64" class="labell" />';
         $sReturn[]           = '<label for="fldName">Field name to analyze:</label>'
                 . '<input type="text" id="fldName" name="fld" placeholder="field name" '
-                . $this->returnInputsCleaned('fld')
+                . $this->returnInputsCleaned('fld', $inArray)
                 . ' size="30" maxlength="64" class="labell" />';
         $sReturn[]           = '<label for="dataType">Data type to change to:</label>'
                 . '<input type="text" id="dataType" name="dt" placeholder="valid data type" '
-                . $this->returnInputsCleaned('dt')
+                . $this->returnInputsCleaned('dt', $inArray)
                 . ' size="30" maxlength="64" class="labell" />';
         $sReturn[]           = '<input type="submit" value="Generate SQL queries for scaling" />';
         $styleForMySQLparams = 'color:green;font-weight:bold;font-style:italic;';
@@ -141,7 +124,7 @@ class FKchange
                 . '<li>MySQL password used: <span style="' . $styleForMySQLparams . '">'
                 . 'cannot be disclosed due to security reasons</span></li>'
                 . '</ul></p>';
-        $thisPage            = filter_var($_REQUEST['PHP_SELF'], FILTER_SANITIZE_URL);
+        $thisPage            = filter_var($inArray['SuperGlobals']->server->get('PHP_SELF'), FILTER_SANITIZE_URL);
         return '<form method="get" action="' . $thisPage . '">'
                 . implode('<br/>', $sReturn)
                 . '</form>';
@@ -256,7 +239,7 @@ class FKchange
             ]);
             $sReturn[] = $this->createForeignKey([
                 'Database'           => $value['TABLE_SCHEMA'],
-                'Table'               => $value['TABLE_NAME'],
+                'Table'              => $value['TABLE_NAME'],
                 'Column'             => $value['COLUMN_NAME'],
                 'ForeignKeyName'     => $value['CONSTRAINT_NAME'],
                 'ReferencedDatabase' => $value['REFERENCED_TABLE_SCHEMA'],
@@ -269,36 +252,51 @@ class FKchange
         return implode('', $sReturn);
     }
 
-    private function returnInputsCleaned($inputFieldName)
+    private function returnInputsCleaned($inputFieldName, $inArray)
     {
         $sReturn = '';
-        if (isset($_REQUEST[$inputFieldName])) {
-            $sReturn = 'value="' . filter_var($_REQUEST[$inputFieldName], FILTER_SANITIZE_STRING) . '" ';
+        if (!is_null($inArray['SuperGlobals']->get($inputFieldName))) {
+            $sReturn = 'value="'
+                    . filter_var($inArray['SuperGlobals']->get($inputFieldName), FILTER_SANITIZE_STRING) . '" ';
         }
         return $sReturn;
+    }
+
+    private function setApplicationHeader()
+    {
+        $pageTitle   = 'Foreign Keys Scale in MySQL';
+        $headerArray = [
+            'css'        => [
+                'css/fk_scale_mysql.css',
+            ],
+            'javascript' => [
+                'vendor/danielgp/common-lib/js/tabber/tabber-management.min.js',
+                'vendor/danielgp/common-lib/js/tabber/tabber.min.js',
+            ],
+            'lang'       => 'en-US',
+            'title'      => $pageTitle,
+        ];
+        return $this->setHeaderCommon($headerArray)
+                . '<h1>' . $pageTitle . '</h1>';
     }
 
     private function setColumnDefinitionAditional($nullableYesNo, $defaultValue = '', $extra = '')
     {
         switch ($nullableYesNo) {
             case 'NO':
-                if ($defaultValue === null) {
+                $columnDefAdtnl = 'NOT NULL DEFAULT "' . $defaultValue . '"';
+                if (is_null($defaultValue)) {
                     $columnDefAdtnl = 'NOT NULL';
-                } else {
-                    $columnDefAdtnl = 'NOT NULL DEFAULT "' . $defaultValue . '"';
                 }
                 break;
             case 'YES':
-                if ($defaultValue === null) {
+                $columnDefAdtnl = 'DEFAULT "' . $defaultValue . '"';
+                if (is_null($defaultValue)) {
                     $columnDefAdtnl = 'DEFAULT NULL';
-                } else {
-                    $columnDefAdtnl = 'DEFAULT "' . $defaultValue . '"';
                 }
                 break;
         }
-        if ($extra == 'auto_increment') {
-            $columnDefAdtnl .= ' AUTO_INCREMENT';
-        }
-        return $columnDefAdtnl;
+        return $columnDefAdtnl
+                . (($extra == 'auto_increment') ? ' AUTO_INCREMENT' : '');
     }
 }
