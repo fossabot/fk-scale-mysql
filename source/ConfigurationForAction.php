@@ -41,9 +41,9 @@ trait ConfigurationForAction
      *
      * @return array
      */
-    protected function targetElementsToModify($inArray)
+    protected function targetElementsToModify($sGb)
     {
-        $this->superGlobals = $inArray['SuperGlobals'];
+        $this->superGlobals = $sGb;
         return [
             'Database'    => $this->manageInputWithDefaults([
                 'InputName'    => 'db',
