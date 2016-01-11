@@ -97,7 +97,7 @@ class FKchange
 
     private function createChangeColumnPackForChange($key, $value, $elToModify)
     {
-        $sReturn[] = $this->createChangeColumn([
+        $colParams = [
             'Database'       => $value['TABLE_SCHEMA'],
             'Table'          => $value['TABLE_NAME'],
             'Column'         => $value['COLUMN_NAME'],
@@ -106,7 +106,8 @@ class FKchange
             'COLUMN_DEFAULT' => $this->applicationSpecificArray['Cols'][$key][0]['COLUMN_DEFAULT'],
             'EXTRA'          => $this->applicationSpecificArray['Cols'][$key][0]['EXTRA'],
             'COLUMN_COMMENT' => $this->applicationSpecificArray['Cols'][$key][0]['COLUMN_COMMENT'],
-        ]);
+        ];
+        return $this->createChangeColumn($colParams);
     }
 
     private function createDropForeignKey($parameters)
