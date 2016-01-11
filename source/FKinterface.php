@@ -38,7 +38,7 @@ trait FKinterface
 
     use \danielgp\common_lib\CommonCode;
 
-    private function buildInputFormForFKscaling($mysqlConfig, $sGb)
+    private function buildInputFormForFKscaling($mysqlConfig, \Symfony\Component\HttpFoundation\Request $sGb)
     {
         $sReturn   = [];
         $sReturn[] = $this->buildInputs(['field' => 'db', 'label' => 'Database name to analyze'], $sGb);
@@ -52,10 +52,10 @@ trait FKinterface
                 . '</form>';
     }
 
-    protected function buildInputFormTab($mysqlConfig, $transmitedParameters, $sGb)
+    protected function buildInputFormTab($mysqlConfig, $tParams, \Symfony\Component\HttpFoundation\Request $sGb)
     {
         return '<div class="tabber" id="tabberFKscaleMySQL">'
-                . '<div class="tabbertab' . ($transmitedParameters ? '' : ' tabbertabdefault')
+                . '<div class="tabbertab' . ($tParams ? '' : ' tabbertabdefault')
                 . '" id="FKscaleMySQLparameters" title="Parameters for scaling">'
                 . $this->buildInputFormForFKscaling($mysqlConfig, $sGb)
                 . '</div><!-- end of Parameters tab -->';
