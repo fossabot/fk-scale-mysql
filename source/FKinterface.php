@@ -89,7 +89,7 @@ trait FKinterface
                 . '</ul></p>';
     }
 
-    private function returnInputsCleaned($inputFieldName, $sGb)
+    private function returnInputsCleaned($inputFieldName, \Symfony\Component\HttpFoundation\Request $sGb)
     {
         $sReturn = '';
         if (!is_null($sGb->get($inputFieldName))) {
