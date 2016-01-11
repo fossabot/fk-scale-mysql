@@ -63,8 +63,39 @@ class FKchange
                 . '" id="FKscaleMySQLparameters" title="Parameters for scaling">'
                 . $this->buildInputFormForFKscaling($mysqlConfig, ['SuperGlobals' => $inArray['SuperGlobals']])
                 . '</div><!-- end of Parameters tab -->';
-        $targetTableTextFlds  = $this->getForeignKeys($elToModify);
-        $sReturn[]            = '<div class="tabbertab' . ($transmitedParameters ? ' tabbertabdefault' : '')
+        $sReturn[]            = $this->buildResultsTab($mConnection, $elToModify, $transmitedParameters);
+        return implode('', $sReturn);
+    }
+
+    private function buildInputFormForFKscaling($mysqlConfig, $inArray)
+    {
+        $sReturn   = [];
+        $sGb       = $inArray['SuperGlobals'];
+        $sReturn[] = $this->buildInputs(['field' => 'db', 'label' => 'Database name to analyze'], $sGb);
+        $sReturn[] = $this->buildInputs(['field' => 'tbl', 'label' => 'Table name to analyze'], $sGb);
+        $sReturn[] = $this->buildInputs(['field' => 'fld', 'label' => 'Field name to analyze'], $sGb);
+        $sReturn[] = $this->buildInputs(['field' => 'data', 'label' => 'Data name to analyze'], $sGb);
+        $sReturn[] = '<input type="submit" value="Generate SQL queries for scaling" />';
+        $sReturn[] = $this->displayMySqlConfiguration($mysqlConfig);
+        return '<form method="get" action="' . filter_var($sGb->server->get('PHP_SELF'), FILTER_SANITIZE_URL) . '">'
+                . implode('<br/>', $sReturn)
+                . '</form>';
+    }
+
+    private function buildInputs($inArray, $sGb)
+    {
+        return '<label for="' . $inArray['field'] . 'Name">' . $inArray['label'] . ':</label>'
+                . '<input type="text" id="' . $inArray['field'] . 'Name" name="' . $inArray['field']
+                . '" placeholder="' . explode(' ', $inArray['label'])[0] . ' name" '
+                . $this->returnInputsCleaned($inArray['field'], $sGb)
+                . 'size="30" maxlength="64" class="labell" />';
+    }
+
+    private function buildResultsTab($mConnection, $elToModify, $transmitedParameters)
+    {
+        $sReturn             = [];
+        $targetTableTextFlds = $this->getForeignKeys($elToModify);
+        $sReturn[]           = '<div class="tabbertab' . ($transmitedParameters ? ' tabbertabdefault' : '')
                 . '" id="FKscaleMySQLresults" title="Results">';
         if (is_array($targetTableTextFlds)) {
             $sReturn[]    = $this->createDropForeignKeysAndGetTargetColumnDefinition($targetTableTextFlds);
@@ -87,47 +118,6 @@ class FKchange
         $sReturn[] = '</div><!-- end of FKscaleMySQLresults tab -->'
                 . '</div><!-- tabberFKscaleMySQL -->';
         return implode('', $sReturn);
-    }
-
-    private function buildInputFormForFKscaling($mysqlConfig, $inArray)
-    {
-        $sReturn             = [];
-        $sReturn[]           = '<label for="dbName">Database name to analyze:</label>'
-                . '<input type="text" id="dbName" name="db" placeholder="database name" '
-                . $this->returnInputsCleaned('db', $inArray)
-                . 'size="30" maxlength="64" class="labell" />';
-        $sReturn[]           = '<label for="tblName">Table name to analyze:</label>'
-                . '<input type="text" id="tblName" name="tbl" placeholder="table name" '
-                . $this->returnInputsCleaned('tbl', $inArray)
-                . ' size="30" maxlength="64" class="labell" />';
-        $sReturn[]           = '<label for="fldName">Field name to analyze:</label>'
-                . '<input type="text" id="fldName" name="fld" placeholder="field name" '
-                . $this->returnInputsCleaned('fld', $inArray)
-                . ' size="30" maxlength="64" class="labell" />';
-        $sReturn[]           = '<label for="dataType">Data type to change to:</label>'
-                . '<input type="text" id="dataType" name="dt" placeholder="valid data type" '
-                . $this->returnInputsCleaned('dt', $inArray)
-                . ' size="30" maxlength="64" class="labell" />';
-        $sReturn[]           = '<input type="submit" value="Generate SQL queries for scaling" />';
-        $styleForMySQLparams = 'color:green;font-weight:bold;font-style:italic;';
-        $sReturn[]           = '<p>For security reasons the MySQL connection details are not available '
-                . 'to be set/modified through the interface and must be set directly '
-                . 'into the "configurationMySQL.php" file. Currently these settings are:<ul>'
-                . '<li>Host name where MySQL server resides: <span style="' . $styleForMySQLparams . '">'
-                . $mysqlConfig['host'] . '</span></li>'
-                . '<li>MySQL port used: <span style="' . $styleForMySQLparams . '">'
-                . $mysqlConfig['port'] . '</span></li>'
-                . '<li>MySQL database to connect to: <span style="' . $styleForMySQLparams . '">'
-                . $mysqlConfig['database'] . '</span></li>'
-                . '<li>MySQL username used: <span style="' . $styleForMySQLparams . '">'
-                . $mysqlConfig['username'] . '</span></li>'
-                . '<li>MySQL password used: <span style="' . $styleForMySQLparams . '">'
-                . 'cannot be disclosed due to security reasons</span></li>'
-                . '</ul></p>';
-        $thisPage            = filter_var($inArray['SuperGlobals']->server->get('PHP_SELF'), FILTER_SANITIZE_URL);
-        return '<form method="get" action="' . $thisPage . '">'
-                . implode('<br/>', $sReturn)
-                . '</form>';
     }
 
     private function createChangeColumn($parameters, $aditionalFeatures = null)
@@ -187,6 +177,25 @@ class FKchange
                 . ($parameters['RuleUpdate'] == 'NULL' ? 'SET NULL' : $parameters['RuleUpdate'])
                 . ';'
                 . '</div>';
+    }
+
+    private function displayMySqlConfiguration($mysqlConfig)
+    {
+        $styleForMySQLparams = 'color:green;font-weight:bold;font-style:italic;';
+        return '<p>For security reasons the MySQL connection details are not available '
+                . 'to be set/modified through the interface and must be set directly '
+                . 'into the "configurationMySQL.php" file. Currently these settings are:<ul>'
+                . '<li>Host name where MySQL server resides: <span style="' . $styleForMySQLparams . '">'
+                . $mysqlConfig['host'] . '</span></li>'
+                . '<li>MySQL port used: <span style="' . $styleForMySQLparams . '">'
+                . $mysqlConfig['port'] . '</span></li>'
+                . '<li>MySQL database to connect to: <span style="' . $styleForMySQLparams . '">'
+                . $mysqlConfig['database'] . '</span></li>'
+                . '<li>MySQL username used: <span style="' . $styleForMySQLparams . '">'
+                . $mysqlConfig['username'] . '</span></li>'
+                . '<li>MySQL password used: <span style="' . $styleForMySQLparams . '">'
+                . 'cannot be disclosed due to security reasons</span></li>'
+                . '</ul></p>';
     }
 
     private function getForeignKeys($elToModify)
@@ -252,12 +261,11 @@ class FKchange
         return implode('', $sReturn);
     }
 
-    private function returnInputsCleaned($inputFieldName, $inArray)
+    private function returnInputsCleaned($inputFieldName, $sGb)
     {
         $sReturn = '';
-        if (!is_null($inArray['SuperGlobals']->get($inputFieldName))) {
-            $sReturn = 'value="'
-                    . filter_var($inArray['SuperGlobals']->get($inputFieldName), FILTER_SANITIZE_STRING) . '" ';
+        if (!is_null($sGb->get($inputFieldName))) {
+            $sReturn = 'value="' . filter_var($sGb->get($inputFieldName), FILTER_SANITIZE_STRING) . '" ';
         }
         return $sReturn;
     }
@@ -282,6 +290,7 @@ class FKchange
 
     private function setColumnDefinitionAditional($nullableYesNo, $defaultValue = '', $extra = '')
     {
+        $columnDefAdtnl = '';
         switch ($nullableYesNo) {
             case 'NO':
                 $columnDefAdtnl = 'NOT NULL DEFAULT "' . $defaultValue . '"';
