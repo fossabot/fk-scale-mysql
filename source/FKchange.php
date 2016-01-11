@@ -77,7 +77,7 @@ class FKchange
                 'includeOldColumnType' => true,
             ]);
             $sReturn[]    = $this->recreateFKs($elToModify, $targetTableTextFlds);
-        } else {
+        } elseif (!is_array($targetTableTextFlds)) {
             $sReturn[] = $this->returnMessagesInCaseOfNoResults($mConnection);
         }
         $sReturn[] = '</div><!-- end of FKscaleMySQLresults tab -->'
