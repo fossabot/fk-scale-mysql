@@ -74,7 +74,7 @@ class FKchange
         $sReturn[] = $this->buildInputs(['field' => 'db', 'label' => 'Database name to analyze'], $sGb);
         $sReturn[] = $this->buildInputs(['field' => 'tbl', 'label' => 'Table name to analyze'], $sGb);
         $sReturn[] = $this->buildInputs(['field' => 'fld', 'label' => 'Field name to analyze'], $sGb);
-        $sReturn[] = $this->buildInputs(['field' => 'data', 'label' => 'Data name to analyze'], $sGb);
+        $sReturn[] = $this->buildInputs(['field' => 'dt', 'label' => 'Data type to change to'], $sGb);
         $sReturn[] = '<input type="submit" value="Generate SQL queries for scaling" />';
         $sReturn[] = $this->displayMySqlConfiguration($mysqlConfig);
         return '<form method="get" action="' . filter_var($sGb->server->get('PHP_SELF'), FILTER_SANITIZE_URL) . '">'
