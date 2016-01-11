@@ -95,6 +95,20 @@ class FKchange
                 . '</div>';
     }
 
+    private function createChangeColumnPackForChange($key, $value, $elToModify)
+    {
+        $sReturn[] = $this->createChangeColumn([
+            'Database'       => $value['TABLE_SCHEMA'],
+            'Table'          => $value['TABLE_NAME'],
+            'Column'         => $value['COLUMN_NAME'],
+            'NewDataType'    => $elToModify['NewDataType'],
+            'IS_NULLABLE'    => $this->applicationSpecificArray['Cols'][$key][0]['IS_NULLABLE'],
+            'COLUMN_DEFAULT' => $this->applicationSpecificArray['Cols'][$key][0]['COLUMN_DEFAULT'],
+            'EXTRA'          => $this->applicationSpecificArray['Cols'][$key][0]['EXTRA'],
+            'COLUMN_COMMENT' => $this->applicationSpecificArray['Cols'][$key][0]['COLUMN_COMMENT'],
+        ]);
+    }
+
     private function createDropForeignKey($parameters)
     {
         return '<div style="color:red;">'
@@ -131,6 +145,22 @@ class FKchange
                 . 'ON DELETE ' . ($params['RuleDelete'] == 'NULL' ? 'SET NULL' : $params['RuleDelete']) . ' '
                 . 'ON UPDATE ' . ($params['RuleUpdate'] == 'NULL' ? 'SET NULL' : $params['RuleUpdate']) . ';'
                 . '</div>';
+    }
+
+    private function createForeignKeyPacked($inArray)
+    {
+        $fkParams = [
+            'Database'           => $inArray['TABLE_SCHEMA'],
+            'Table'              => $inArray['TABLE_NAME'],
+            'Column'             => $inArray['COLUMN_NAME'],
+            'ForeignKeyName'     => $inArray['CONSTRAINT_NAME'],
+            'ReferencedDatabase' => $inArray['REFERENCED_TABLE_SCHEMA'],
+            'ReferencedTable'    => $inArray['REFERENCED_TABLE_NAME'],
+            'ReferencedColumn'   => $inArray['REFERENCED_COLUMN_NAME'],
+            'RuleDelete'         => $inArray['DELETE_RULE'],
+            'RuleUpdate'         => $inArray['UPDATE_RULE'],
+        ];
+        return $this->createForeignKey($fkParams);
     }
 
     private function getForeignKeys($elToModify)
@@ -170,27 +200,8 @@ class FKchange
     {
         $sReturn = [];
         foreach ($targetTableTextFlds as $key => $value) {
-            $sReturn[] = $this->createChangeColumn([
-                'Database'       => $value['TABLE_SCHEMA'],
-                'Table'          => $value['TABLE_NAME'],
-                'Column'         => $value['COLUMN_NAME'],
-                'NewDataType'    => $elToModify['NewDataType'],
-                'IS_NULLABLE'    => $this->applicationSpecificArray['Cols'][$key][0]['IS_NULLABLE'],
-                'COLUMN_DEFAULT' => $this->applicationSpecificArray['Cols'][$key][0]['COLUMN_DEFAULT'],
-                'EXTRA'          => $this->applicationSpecificArray['Cols'][$key][0]['EXTRA'],
-                'COLUMN_COMMENT' => $this->applicationSpecificArray['Cols'][$key][0]['COLUMN_COMMENT'],
-            ]);
-            $sReturn[] = $this->createForeignKey([
-                'Database'           => $value['TABLE_SCHEMA'],
-                'Table'              => $value['TABLE_NAME'],
-                'Column'             => $value['COLUMN_NAME'],
-                'ForeignKeyName'     => $value['CONSTRAINT_NAME'],
-                'ReferencedDatabase' => $value['REFERENCED_TABLE_SCHEMA'],
-                'ReferencedTable'    => $value['REFERENCED_TABLE_NAME'],
-                'ReferencedColumn'   => $value['REFERENCED_COLUMN_NAME'],
-                'RuleDelete'         => $value['DELETE_RULE'],
-                'RuleUpdate'         => $value['UPDATE_RULE'],
-            ]);
+            $sReturn[] = $this->createChangeColumnPackForChange($key, $value, $elToModify);
+            $sReturn[] = $this->createForeignKeyPacked($value);
         }
         return implode('', $sReturn);
     }
@@ -210,11 +221,10 @@ class FKchange
     private function setColumnDefinitionPrefix($nullableYesNo, $defaultValue)
     {
         $colDefinition = 'NOT NULL DEFAULT "' . $defaultValue . '"';
-        if ($nullableYesNo == 'NO') {
-            if (is_null($defaultValue)) {
-                $colDefinition = 'NOT NULL';
-            }
-        } elseif ($nullableYesNo == 'YES') {
+        if (is_null($defaultValue)) {
+            $colDefinition = 'NOT NULL';
+        }
+        if ($nullableYesNo == 'YES') {
             $colDefinition = 'DEFAULT "' . $defaultValue . '"';
             if ($defaultValue === null) {
                 $colDefinition = 'DEFAULT NULL';
