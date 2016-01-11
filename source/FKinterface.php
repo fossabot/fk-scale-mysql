@@ -103,11 +103,10 @@ trait FKinterface
         if (strlen($mConnection) === 0) {
             return '<p style="color:red;">Check if provided parameters are correct '
                     . 'as the combination of Database. Table and Column name were not found as a Foreign Key!</p>';
-        } else {
-            return '<p style="color:red;">Check your "configurationMySQL.php" file '
-                    . 'for correct MySQL connection parameters '
-                    . 'as the current ones were not able to be used to establish a connection!</p>';
         }
+        return '<p style="color:red;">Check your "configurationMySQL.php" file '
+                . 'for correct MySQL connection parameters '
+                . 'as the current ones were not able to be used to establish a connection!</p>';
     }
 
     protected function setApplicationFooter()
