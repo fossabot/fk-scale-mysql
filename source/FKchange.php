@@ -38,8 +38,7 @@ class FKchange
 
     use ConfigurationMySQL,
         ConfigurationForAction,
-        FKinterface,
-        \danielgp\common_lib\MySQLiAdvancedOutput;
+        FKinterface;
 
     private $applicationSpecificArray;
 
