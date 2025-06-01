@@ -7,6 +7,7 @@ Packagist statistics by poser.pugx.org
 [![License](https://poser.pugx.org/danielgp/fk-scale-mysql/license)](https://packagist.org/packages/danielgp/fk-scale-mysql)
 [![Monthly Downloads](https://poser.pugx.org/danielgp/fk-scale-mysql/d/monthly)](https://packagist.org/packages/danielgp/fk-scale-mysql)
 [![Daily Downloads](https://poser.pugx.org/danielgp/fk-scale-mysql/d/daily)](https://packagist.org/packages/danielgp/fk-scale-mysql)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdanielgp%2Ffk-scale-mysql.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdanielgp%2Ffk-scale-mysql?ref=badge_shield)
 
 Code quality analysis
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/c392dde2-7f81-413c-9c80-da48a3a4b89c/big.png)](https://insight.sensiolabs.com/projects/c392dde2-7f81-413c-9c80-da48a3a4b89c)
@@ -23,3 +24,7 @@ In order to use this package following steps have to be followed:
 Final remark: This packages only analyze (not a single modification is performed) and only provides sequence of query to make necessary scaling (up or down) of Foreign Keys in MySQL databases starting from a combination of a Database/Table/Column!
 
 (https://github.com/danielgp/fk-scale-mysql)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdanielgp%2Ffk-scale-mysql.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdanielgp%2Ffk-scale-mysql?ref=badge_large)
